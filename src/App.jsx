@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 import { db } from '../db'
 import Swal from 'sweetalert2'
@@ -6,7 +6,9 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { IonIcon } from '@ionic/react'
-import { add, checkmarkOutline, closeCircle} from "ionicons/icons"
+import { add, calendar, checkmarkOutline, closeCircle } from "ionicons/icons"
+import Modal from './Modal'
+import EditDateCmp from './EditDateCmp'
 
 function getTimeAgo(inputdate) {
   const currentDate = new Date();
@@ -40,7 +42,7 @@ function getTimeAgo(inputdate) {
       return w + (w === 1 ? "w ago" : "w ago");
     }
   } else if (d > 0) {
-      return d + (d === 1 ? "d ago" : "d ago");
+    return d + (d === 1 ? "d ago" : "d ago");
 
   } else if (h > 0) {
     const remainingMinutes = minutes - h * 60;
@@ -57,107 +59,119 @@ function getTimeAgo(inputdate) {
   }
 }
 
-function toDate(d){
+function toDate(d) {
   let date = new Date(d)
-  return (date.getDay() < 10 ? "0" + date.getDay() : date.getDay()) + "/" + (date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()) + "/" + date.getFullYear() + " " +(date.getHours() < 10 ? "0"+date.getHours(): date.getHours())  + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes())
+  return (date.getDay() < 10 ? "0" + date.getDay() : date.getDay()) + "/" + (date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()) + "/" + date.getFullYear() + " " + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes())
 }
 
 function App() {
+  const [editModalShow, setEditModalShow] = useState(false);
+  const [toEdit, setToEdit] = useState({})
   const [name, setName] = useState("")
 
   const habitsData = useLiveQuery(
     () => db.actions.orderBy("date").toArray()
   );
 
-  const addItem = (e)=>{
-e.preventDefault()
-if(name)
-db.actions.add({
-  name,
-  date: new Date()
-}).then(res=>{
-  toast.success('Habit created successfully', {
-    position: "top-right",
-    autoClose: 2000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-    });
-  setName("")
-})
+  const addItem = (e) => {
+    e.preventDefault()
+    if (name)
+      db.actions.add({
+        name,
+        date: new Date()
+      }).then(() => {
+        toast.success('Habit created successfully', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        setName("")
+      })
   }
 
-  function deleteHabit(habit){
-db.actions.delete(habit.id).then(res=>{
-  toast.success('Habit deleted successfully', {
-    position: "top-right",
-    autoClose: 2000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-    });
-})
-  }
-
-function didHabit(e,habit){
-  const newDate = e.target.value ? new Date(e.target.value) : new Date()
-
-  db.actions.update(habit.id, {date: newDate}).then(function (updated) {
-    if (updated)
-    toast.success('Habit updated', {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
+  function deleteHabit(habit) {
+    db.actions.delete(habit.id).then(() => {
+      toast.success('Habit deleted successfully', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
       });
-    else
-      Swal.fire("Error","there was an error", "error")
-  });
-  
-}
+    })
+  }
+
+  function didHabit(e, habit) {
+    const newDate = e.target.value ? new Date(e.target.value) : new Date()
+
+    db.actions.update(habit.id, { date: newDate }).then(function (updated) {
+      if (updated)
+        toast.success('Habit updated', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      else
+        Swal.fire("Error", "there was an error", "error")
+    });
+
+  }
 
   return (
     <>
-<div className="flex flex-col h-screen py-10 gap-8">
-  <nav className='shadow-xl h-[40px] flex items-center font-bold text-xl fixed top-0 w-full px-8 bg-white'>LasTime</nav>
-  <div className='p-2 flex-col flex gap-4 h-[calc(100vh-40px)]'>
-<form className="p-4 flex justify-center items-center rounded" onSubmit={addItem}>
-  <div className="focus-within:ring ring-black rounded-full transition duration-200 flex">
-<input type="text" className="outline-none border rounded-l-full p-2 "  onChange={(e)=>setName(e.target.value)} value={name}/>
-<button className="bg-black py-2 px-4 text-white flex justify-center items-center rounded-r-full border border-black" type="submit"> <IonIcon icon={add} className="font-bold" /> </button>
-  </div>
-</form>
-<div className="p-2 w-full max-w-4xl mx-auto flex flex-col gap-4 flex-grow overflow-auto">
-  {habitsData?.length > 0 ?
-habitsData?.map(habit=>
-<div key={habit.id} className="relative shadow-lg grid grid-cols-12 gap-4 p-4 justify-items-center items-center">
-  <button className="text-2xl text-red-500 absolute right-[-5px] top-[-5px]" onClick={()=>deleteHabit(habit)}><IonIcon icon={closeCircle} className="" /></button>
-  <div className="col-span-4 justify-self-start font-bold break-all">{habit.name}</div>
-  <div className="col-span-5 text-gray-500 flex flex-col sm:flex-row gap-2 items-center"><div className="flex flex-col items-center"><div>{getTimeAgo(habit.date)}</div><div className="text-sm hidden sm:block">{toDate(habit.date)}</div> </div> <input type='date' className="w-[25px] sm:w-[20px]" onChange={(e)=>didHabit(e,habit)} /></div>
-  <div className="col-span-3 justify-self-end">
-    <button className="bg-black py-2 px-4 rounded-full text-white flex items-center" type='button' onClick={(e)=>didHabit(e,habit)} ><IonIcon icon={checkmarkOutline} /> </button>
-  </div>
-  </div>)
-  :
-  <div className="text-2xl p-8 text-center font-bold flex justify-center items-center">
-you have no habits, create one now !
-  </div>
-}
+      <div className="flex flex-col h-screen py-10 gap-8">
+        <nav className='shadow-xl h-[40px] flex items-center font-bold text-xl fixed top-0 w-full px-8 bg-white'>LasTime</nav>
+        <div className='p-2 flex-col flex gap-4 h-[calc(100vh-40px)]'>
+          <form className="p-4 flex justify-center items-center rounded" onSubmit={addItem}>
+            <div className="focus-within:ring ring-black rounded-full transition duration-200 flex">
+              <input type="text" className="outline-none border rounded-l-full p-2 " onChange={(e) => setName(e.target.value)} value={name} />
+              <button className="bg-black py-2 px-4 text-white flex justify-center items-center rounded-r-full border border-black" type="submit"> <IonIcon icon={add} className="font-bold" /> </button>
+            </div>
+          </form>
+          <div className="p-2 w-full max-w-4xl mx-auto flex flex-col gap-4 flex-grow overflow-auto">
+            {habitsData?.length > 0 ?
+              habitsData?.map(habit =>
+                <div key={habit.id} className="relative shadow-lg grid grid-cols-12 gap-4 p-4 justify-items-center items-center">
+                  <button className="text-2xl text-red-500 absolute right-[-5px] top-[-5px]" onClick={() => deleteHabit(habit)}><IonIcon icon={closeCircle} className="" /></button>
+                  <div className="col-span-4 justify-self-start font-bold break-all">{habit.name}</div>
+                  <div className="col-span-5 text-gray-500 flex gap-2 items-center"><div className="flex flex-col items-center"><div>{getTimeAgo(habit.date)}</div><div className="text-sm hidden sm:block">{toDate(habit.date)}</div> </div></div>
+                  <div className="col-span-3 justify-self-end flex flex-col sm:flex-row gap-2">
+                    <button className="bg-black py-2 px-4 rounded-full text-white flex items-center" onClick={() => { setToEdit(habit); setEditModalShow(true) }}><IonIcon icon={calendar} /></button>
+                    <button className="bg-black py-2 px-4 rounded-full text-white flex items-center" type='button' onClick={(e) => didHabit(e, habit)} ><IonIcon icon={checkmarkOutline} /> </button>
+                  </div>
+                </div>)
+              :
+              <div className="text-2xl p-8 text-center font-bold flex justify-center items-center">
+                you have no habits, create one now !
+              </div>
+            }
 
-  </div>
-  </div>
-</div>
-<ToastContainer />
+          </div>
+        </div>
+      </div>
+      <ToastContainer />
+      <Modal
+        show={editModalShow}
+        hide={() => {
+          setEditModalShow(false);
+        }}
+        dialogClassName="w-full sm:max-w-2xl h-fit my-auto pb-5 rounded-xl"
+      >
+        <EditDateCmp habit={toEdit} close={setEditModalShow} />
+      </Modal>
     </>
   )
 }
