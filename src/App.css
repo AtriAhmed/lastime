@@ -1,0 +1,7 @@
+.swal2-confirm {
+  background-color: black !important;
+}
+
+ion-icon {
+  --ionicon-stroke-width: 64px;
+}
