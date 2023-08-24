@@ -35,10 +35,10 @@ export default function EditDateCmp({ habit, close }) {
             <div className="font-bold bg-gray-100 w-full p-4 flex items-center rounded-t-xl text-xl">
                 Change Date
             </div>
-            <div className="pb-5 p-10 flex flex-col items-center justify-center gap-4">
-                <input type='date' className="outline-none border py-2 px-4 rounded-full" onChange={(e) => setDate(e.target.value)} />
-                <button className="bg-black py-2 px-4 rounded-full text-white flex items-center font-bold" onClick={didHabit}>Save</button>
-            </div>
+            <form className="pb-5 p-10 flex flex-col items-center justify-center gap-4" onSubmit={didHabit}>
+                <input type='date' placeholder="Change date" className="outline-none border py-2 px-4 rounded-full" onChange={(e) => setDate(e.target.value)} />
+                <button type="submit" className="bg-black py-2 px-4 rounded-full text-white flex items-center font-bold">Save</button>
+            </form>
         </div>
     )
 }
