@@ -9,6 +9,7 @@ import { IonIcon } from '@ionic/react'
 import { add, calendar, checkmarkOutline, closeCircle } from "ionicons/icons"
 import Modal from './Modal'
 import EditDateCmp from './EditDateCmp'
+import Navbar from './Navbar'
 
 function getTimeAgo(inputdate) {
   const currentDate = new Date();
@@ -61,7 +62,7 @@ function getTimeAgo(inputdate) {
 
 function toDate(d) {
   let date = new Date(d)
-  return (date.getDay() < 10 ? "0" + date.getDay() : date.getDay()) + "/" + (date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()) + "/" + date.getFullYear() + " " + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes())
+  return (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + "/" + (date.getMonth() < 9 ? "0" + (parseInt(date.getMonth())+1) : parseInt(date.getMonth())+1) + "/" + date.getFullYear() + " " + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes())
 }
 
 function App() {
@@ -133,7 +134,7 @@ function App() {
   return (
     <>
       <div className="flex flex-col h-screen py-10 gap-8">
-        <nav className='shadow-xl h-[40px] flex items-center font-bold text-xl fixed top-0 w-full px-8 bg-white'>LasTime</nav>
+      <Navbar />
         <div className='p-2 flex-col flex gap-4 h-[calc(100vh-40px)]'>
           <form className="p-4 flex justify-center items-center rounded" onSubmit={addItem}>
             <div className="focus-within:ring ring-black rounded-full transition duration-200 flex">
@@ -155,10 +156,9 @@ function App() {
                 </div>)
               :
               <div className="text-2xl p-8 text-center font-bold flex justify-center items-center">
-                you have no habits, create one now !
+                You have no habits, create one now !
               </div>
             }
-
           </div>
         </div>
       </div>
